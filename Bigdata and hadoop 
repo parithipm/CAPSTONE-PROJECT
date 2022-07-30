@@ -1,0 +1,487 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled11.ipynb",
+      "provenance": [],
+      "authorship_tag": "ABX9TyMYgZzcKkRL/5ZArB/czhO3",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/parithipm/CAPSTONE-PROJECT/blob/main/Bigdata%20and%20hadoop%20\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# code for hive data\n",
+        "Question 1"
+      ],
+      "metadata": {
+        "id": "-iIajUrVvNR3"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "/gs://boston_mkce/data/boston.csv/\n",
+        "\n",
+        "/Create External table for boston/\n",
+        "CREATE EXTERNAL TABLE boston2 (crim float, zn float,indus float,chas float,nox float,rm float,age float,dis float,rad float,tax float,pt float,b float,lstate float,mv float)\n",
+        "ROW FORMAT DELIMITED\n",
+        "FIELDS TERMINATED BY ','\n",
+        "LINES TERMINATED BY '\\n'\n",
+        "STORED AS TEXTFILE\n",
+        "LOCATION 'gs://boston_mkce/data/';"
+      ],
+      "metadata": {
+        "id": "r6MMbZZZv1aY"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "pip install pyspark"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "6R0cY3vYwlDd",
+        "outputId": "010f6ed6-78d2-454f-c147-71a52501c3bc"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/\n",
+            "Collecting pyspark\n",
+            "  Downloading pyspark-3.3.0.tar.gz (281.3 MB)\n",
+            "\u001b[K     |████████████████████████████████| 281.3 MB 38 kB/s \n",
+            "\u001b[?25hCollecting py4j==0.10.9.5\n",
+            "  Downloading py4j-0.10.9.5-py2.py3-none-any.whl (199 kB)\n",
+            "\u001b[K     |████████████████████████████████| 199 kB 54.3 MB/s \n",
+            "\u001b[?25hBuilding wheels for collected packages: pyspark\n",
+            "  Building wheel for pyspark (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
+            "  Created wheel for pyspark: filename=pyspark-3.3.0-py2.py3-none-any.whl size=281764026 sha256=5ac8755e12b7509eb805458c121763f42ca19c135c4a2b600b03f502c8bcadc7\n",
+            "  Stored in directory: /root/.cache/pip/wheels/7a/8e/1b/f73a52650d2e5f337708d9f6a1750d451a7349a867f928b885\n",
+            "Successfully built pyspark\n",
+            "Installing collected packages: py4j, pyspark\n",
+            "Successfully installed py4j-0.10.9.5 pyspark-3.3.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "from pyspark.sql import SparkSession\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns"
+      ],
+      "metadata": {
+        "id": "tSMXr_6Kwo3f"
+      },
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "spark=SparkSession.builder.appName('boston').getOrCreate()"
+      ],
+      "metadata": {
+        "id": "z8Q8jCnww2r7"
+      },
+      "execution_count": 5,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "spark"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 219
+        },
+        "id": "sf-A2_9Ow4pG",
+        "outputId": "8b90c313-b843-48d9-b7ea-2e88860061d6"
+      },
+      "execution_count": 6,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<pyspark.sql.session.SparkSession at 0x7f4bb1f66510>"
+            ],
+            "text/html": [
+              "\n",
+              "            <div>\n",
+              "                <p><b>SparkSession - in-memory</b></p>\n",
+              "                \n",
+              "        <div>\n",
+              "            <p><b>SparkContext</b></p>\n",
+              "\n",
+              "            <p><a href=\"http://1e0d046ac274:4040\">Spark UI</a></p>\n",
+              "\n",
+              "            <dl>\n",
+              "              <dt>Version</dt>\n",
+              "                <dd><code>v3.3.0</code></dd>\n",
+              "              <dt>Master</dt>\n",
+              "                <dd><code>local[*]</code></dd>\n",
+              "              <dt>AppName</dt>\n",
+              "                <dd><code>boston</code></dd>\n",
+              "            </dl>\n",
+              "        </div>\n",
+              "        \n",
+              "            </div>\n",
+              "        "
+            ]
+          },
+          "metadata": {},
+          "execution_count": 6
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "IVA4XVnWw7Jd"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Question 2"
+      ],
+      "metadata": {
+        "id": "ymd4sMJXw8fs"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = spark.read.csv('/content/boston.csv',header='true', \n",
+        "                      inferSchema='true')\n",
+        "df.show(5)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "cwMlpsLSw92s",
+        "outputId": "c520e9bc-e20a-450a-dc85-ffa675ff810e"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+-----------+----+-----------+----+-----------+-----------+-----------+-----------+---+---+-----------+-----------+-----------+-----------+\n",
+            "|       CRIM|  ZN|      INDUS|CHAS|        NOX|         RM|        AGE|        DIS|RAD|TAX|         PT|          B|      LSTAT|         MV|\n",
+            "+-----------+----+-----------+----+-----------+-----------+-----------+-----------+---+---+-----------+-----------+-----------+-----------+\n",
+            "|    0.00632|18.0|2.309999943|   0|0.537999988|6.574999809|65.19999695|4.090000153|  1|296|15.30000019|396.8999939|4.980000019|       24.0|\n",
+            "|0.027310001| 0.0|7.070000172|   0|0.469000012|6.421000004|78.90000153|4.967100143|  2|242|17.79999924|396.8999939|9.140000343|21.60000038|\n",
+            "|    0.02729| 0.0|7.070000172|   0|0.469000012|7.184999943|61.09999847|4.967100143|  2|242|17.79999924|392.8299866| 4.03000021|34.70000076|\n",
+            "|0.032370001| 0.0|2.180000067|   0|0.458000004|6.998000145|45.79999924|6.062200069|  3|222|18.70000076|394.6300049|2.940000057|33.40000153|\n",
+            "|0.069049999| 0.0|2.180000067|   0|0.458000004|7.146999836|54.20000076|6.062200069|  3|222|18.70000076|396.8999939|5.329999924|36.20000076|\n",
+            "+-----------+----+-----------+----+-----------+-----------+-----------+-----------+---+---+-----------+-----------+-----------+-----------+\n",
+            "only showing top 5 rows\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# print schema\n",
+        "df.printSchema()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "fie1cm2KxACY",
+        "outputId": "a7431cdb-488c-4f76-d8e5-0686db4b3835"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "root\n",
+            " |-- CRIM: double (nullable = true)\n",
+            " |-- ZN: double (nullable = true)\n",
+            " |-- INDUS: double (nullable = true)\n",
+            " |-- CHAS: integer (nullable = true)\n",
+            " |-- NOX: double (nullable = true)\n",
+            " |-- RM: double (nullable = true)\n",
+            " |-- AGE: double (nullable = true)\n",
+            " |-- DIS: double (nullable = true)\n",
+            " |-- RAD: integer (nullable = true)\n",
+            " |-- TAX: integer (nullable = true)\n",
+            " |-- PT: double (nullable = true)\n",
+            " |-- B: double (nullable = true)\n",
+            " |-- LSTAT: double (nullable = true)\n",
+            " |-- MV: double (nullable = true)\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "wGJvDZ88xtq0"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Question 3"
+      ],
+      "metadata": {
+        "id": "NR9bCNZ3xu0O"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import six\n",
+        "for i in df.columns:\n",
+        "    if not( isinstance(df.select(i).take(1)[0][0], six.string_types)):\n",
+        "        print( \"Correlation to MV for \", i, df.stat.corr('MV',i))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "UleLf6mOxwJv",
+        "outputId": "a6ddfd2c-0590-4de0-d5ce-c834c2dfab41"
+      },
+      "execution_count": 15,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Correlation to MV for  CRIM -0.3883046116575088\n",
+            "Correlation to MV for  ZN 0.36044534463752903\n",
+            "Correlation to MV for  INDUS -0.48372517128143383\n",
+            "Correlation to MV for  CHAS 0.17526017775291847\n",
+            "Correlation to MV for  NOX -0.4273207763683772\n",
+            "Correlation to MV for  RM 0.695359937127267\n",
+            "Correlation to MV for  AGE -0.37695456714288667\n",
+            "Correlation to MV for  DIS 0.24992873873512172\n",
+            "Correlation to MV for  RAD -0.3816262315669168\n",
+            "Correlation to MV for  TAX -0.46853593528654536\n",
+            "Correlation to MV for  PT -0.5077867038116085\n",
+            "Correlation to MV for  B 0.3334608226834164\n",
+            "Correlation to MV for  LSTAT -0.7376627294671615\n",
+            "Correlation to MV for  MV 1.0\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.ml.feature import VectorAssembler\n",
+        "vectorAssembler = VectorAssembler(inputCols = ['CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PT', 'B', 'LSTAT'], outputCol = 'features')\n"
+      ],
+      "metadata": {
+        "id": "DXwXOTEYxyIu"
+      },
+      "execution_count": 16,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "vhouse_df = vectorAssembler.transform(df)\n"
+      ],
+      "metadata": {
+        "id": "VJmJNoDgyLZc"
+      },
+      "execution_count": 17,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "vhouse_df =vhouse_df.select(['features', 'MV'])\n",
+        "vhouse_df.show(3)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "R6HH6b6CyNs5",
+        "outputId": "9768b5d1-f3b5-47d5-ba77-3c8940e59e4d"
+      },
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "+--------------------+-----------+\n",
+            "|            features|         MV|\n",
+            "+--------------------+-----------+\n",
+            "|[0.00632,18.0,2.3...|       24.0|\n",
+            "|[0.027310001,0.0,...|21.60000038|\n",
+            "|[0.02729,0.0,7.07...|34.70000076|\n",
+            "+--------------------+-----------+\n",
+            "only showing top 3 rows\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "MDgtk4wCyPyW"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Question 4"
+      ],
+      "metadata": {
+        "id": "SvwqWDWmyRSh"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "splits = vhouse_df.randomSplit([0.7, 0.3])\n",
+        "train_df = splits[0]\n",
+        "test_df = splits[1]"
+      ],
+      "metadata": {
+        "id": "qqsXhZPFySjb"
+      },
+      "execution_count": 19,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from pyspark.ml.regression import LinearRegression\n",
+        "lr = LinearRegression(featuresCol = 'features', labelCol='MV', maxIter=10, regParam=0.3, elasticNetParam=0.8)\n",
+        "lr_model = lr.fit(train_df)\n",
+        "print(\"Coefficients: \" + str(lr_model.coefficients))\n",
+        "print(\"Intercept: \" + str(lr_model.intercept))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "vPcP0kfYyUYG",
+        "outputId": "e63bd6c3-9c6d-47ad-ae34-dd756bc15ce7"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Coefficients: [-0.04098148092270199,0.01314744324226483,-0.04474556989901595,2.3406516556647423,-3.6075450145751087,3.8854834548333277,0.0,-0.64672051374062,0.0,-4.45269875741709e-05,-0.5850211340662932,0.007802216539439378,-0.6025137874579649]\n",
+            "Intercept: 18.27348442674727\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Question 5"
+      ],
+      "metadata": {
+        "id": "G-aRV5T-yYiD"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "trainingSummary = lr_model.summary\n",
+        "print(\"RMSE: %f\" % trainingSummary.rootMeanSquaredError)\n",
+        "print(\"r2: %f\" % trainingSummary.r2)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "jcQGaU5Gyc4q",
+        "outputId": "a80c7f20-f7e6-4b42-fa4d-bc4599224582"
+      },
+      "execution_count": 22,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "RMSE: 4.928085\n",
+            "r2: 0.705597\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        ""
+      ],
+      "metadata": {
+        "id": "Fct2U0HYygVy"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
